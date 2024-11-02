@@ -1,6 +1,7 @@
 package com.duoc.seguridad_calidad.provider;
 
 import com.duoc.seguridad_calidad.model.TokenStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,57 +24,57 @@ import java.util.List;
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-    private TokenStore tokenStore;
+    private final TokenStore tokenStore;
 
+    @Autowired
     public CustomAuthenticationProvider(TokenStore tokenStore) {
-        super();
         this.tokenStore = tokenStore;
     }
 
     @Override
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
-        System.out.println("Llegué Custom Authentication Provider: ");
-        System.out.println("Authentication: " + authentication);
+        System.out.println("Llegué a Custom Authentication Provider");
+
         final String name = authentication.getName();
-        System.out.println("Name: " + name);
         final String password = authentication.getCredentials().toString();
+
+        System.out.println("Name: " + name);
         System.out.println("Password: " + password);
 
-        System.out.println("Custom Authentication Provider: " + name);
-        //log.info("Login Success");
-
-
-        final MultiValueMap requestBody = new LinkedMultiValueMap<>();
+        // Crea el cuerpo de la solicitud
+        final MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
         requestBody.add("user", name);
         requestBody.add("encryptedPass", password);
 
-        System.out.println("Request Body: " + requestBody);
-
         final var restTemplate = new RestTemplate();
-        final var responseEntity = restTemplate.postForEntity("http://localhost:8080/login", requestBody, String.class);
+        try {
+            // Realiza la llamada a la API de autenticación
+            final var responseEntity = restTemplate.postForEntity("http://localhost:8080/login", requestBody, String.class);
+            System.out.println("Response Entity: " + responseEntity);
 
-        System.out.println("Response Entity: " + responseEntity);
+            if (responseEntity.getStatusCode() != HttpStatus.OK) {
+                throw new BadCredentialsException("Invalid username or password");
+            }
 
-        tokenStore.setToken(responseEntity.getBody());
+            // Guarda el token si la respuesta es exitosa
+            tokenStore.setToken(responseEntity.getBody());
+            System.out.println("Token Store: " + tokenStore.getToken());
 
-        System.out.println("Token Store: " + tokenStore.getToken());
+            // Configura las autoridades (roles)
+            List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 
-        if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            throw new BadCredentialsException("Invalid username or password");
+            // Retorna el token de autenticación
+            return new UsernamePasswordAuthenticationToken(name, password, authorities);
+
+        } catch (Exception ex) {
+            System.out.println("Error during authentication: " + ex.getMessage());
+            throw new BadCredentialsException("Invalid username or password", ex);
         }
-
-        List authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-
-        Authentication authenticatedToken = new UsernamePasswordAuthenticationToken(name, password,
-                authorities);
-
-        return authenticatedToken;
-
     }
 
     @Override
-    public boolean supports(Class authentication) {
+    public boolean supports(Class<?> authentication) {
         return authentication.equals(UsernamePasswordAuthenticationToken.class);
     }
 }

@@ -1,29 +1,116 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Página de Inicio</title>
+    <title>Página de Inicio - Recetas</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" type="text/css" href="/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <style>
+        /* Estilos personalizados */
+        .navbar-custom {
+            background-color: #343a40;
+        }
+
+        .navbar-custom .navbar-brand,
+        .navbar-custom .nav-link {
+            color: #ffffff;
+        }
+
+        .section-title {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .card-custom {
+            transition: transform 0.3s;
+        }
+
+        .card-custom:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header-custom {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-detail {
+            background-color: #28a745;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-detail:hover {
+            background-color: #218838;
+            color: white;
+        }
+
+        /* Estilos para la sección de banners */
+        .banner-section {
+            background-color: #4e5d6c;
+            color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            transition: background-color 0.3s;
+        }
+
+        .carousel-item.active {
+            transition: opacity 1s ease-in-out;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            filter: invert(1);
+        }
+    </style>
 </head>
 
 <body>
+
+<!-- Barra de Navegación -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <div class="container">
+        <a class="navbar-brand" href="#">Recetas</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Recetas</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Populares</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Contacto</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Contenido Principal -->
 <div class="container py-5">
     <!-- Header -->
     <div class="text-center mb-5">
-        <h1 class="display-4 text-success">Recetas Populares y Recientes</h1>
+        <h1 class="display-4 section-title">Recetas Populares y Recientes</h1>
         <p class="lead">Explora nuestras recetas más populares y descubre las más recientes</p>
     </div>
 
-    <!-- Recetas Section -->
+    <!-- Sección de Recetas -->
     <div class="row">
         <!-- Recetas Recientes -->
         <div class="col-md-6 mb-4">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white text-center">
-                    <h2>Recetas Recientes</h2>
+            <div class="card card-custom shadow">
+                <div class="card-header card-header-custom text-center">
+                    <h2 class="h5">Recetas Recientes</h2>
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item" th:each="receta : ${recetasRecientes}">
@@ -31,7 +118,7 @@
                         <p><strong>País de origen:</strong> <span th:text="${receta.paisOrigen}">País de origen</span></p>
                         <p><strong>Tipo de cocina:</strong> <span th:text="${receta.tipoCocina}">Tipo de cocina</span></p>
                         <p><strong>Dificultad:</strong> <span th:text="${receta.dificultad}">Dificultad</span></p>
-                        <a th:href="@{'/recetas/'+${receta.id}+'/detalle' }" class="btn btn-primary mt-2">Ver Detalle</a>
+                        <a th:href="@{'/recetas/'+${receta.id}+'/detalle' }" class="btn btn-detail mt-3">Ver Detalle</a>
                     </li>
                 </ul>
             </div>
@@ -39,9 +126,9 @@
 
         <!-- Recetas Populares -->
         <div class="col-md-6 mb-4">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white text-center">
-                    <h2>Recetas Populares</h2>
+            <div class="card card-custom shadow">
+                <div class="card-header card-header-custom text-center">
+                    <h2 class="h5">Recetas Populares</h2>
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item" th:each="receta : ${recetasPopulares}">
@@ -49,28 +136,16 @@
                         <p><strong>País de origen:</strong> <span th:text="${receta.paisOrigen}">País de origen</span></p>
                         <p><strong>Tipo de cocina:</strong> <span th:text="${receta.tipoCocina}">Tipo de cocina</span></p>
                         <p><strong>Dificultad:</strong> <span th:text="${receta.dificultad}">Dificultad</span></p>
-                        <a th:href="@{'/recetas/'+ ${receta.id} +'/detalle' }" methods="get" class="btn btn-primary mt-2">Ver Detalle</a>
+                        <a th:href="@{'/recetas/'+ ${receta.id} +'/detalle' }" class="btn btn-detail mt-3">Ver Detalle</a>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
 
-    <!-- Banners Section -->
-    <div class="row">
-        <div class="col">
-            <div class="card shadow mt-4">
-                <div class="card-header bg-secondary text-white text-center">
-                    <h2>Banners</h2>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item text-center" th:each="banner : ${banners}" th:text="${banner}">Texto del banner</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
 
+
+<!-- Script de Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-qLaAsjfU4lCOjI96S+V7sLlC3y2D6phm9ie+Y7fG9kKqCBYbTDBGbIf/GTbu0cRt" crossorigin="anonymous"></script>
 </body>
 

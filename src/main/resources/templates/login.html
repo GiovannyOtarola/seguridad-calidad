@@ -4,13 +4,10 @@
      <title>Ejemplo Spring Security Login </title> 
     <link rel="stylesheet" type="text/css" href="/login.css"> 
      </head> 
-    <body> 
-    <div th:if="${param.error}"> 
-        Invalid username and password. 
-    </div> 
-    <div th:if="${param.logout}"> 
-        You have been logged out. 
-    </div> 
+    <body>
+    <div th:if="${param.error}" class="error-message">
+        Nombre de usuario o contraseña incorrectos. Por favor, inténtalo de nuevo.
+    </div>
         <form th:action="@{/login}" method="post"> 
             <div><label> User Name : <input type="text" name="username" th:value="user1"/> </label></div>
             <div><label> Password: <input type="password" name="password" th:value="password1"/> </label></div>
