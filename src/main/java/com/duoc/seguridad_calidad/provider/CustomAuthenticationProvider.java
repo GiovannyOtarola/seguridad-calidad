@@ -52,7 +52,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             final var responseEntity = restTemplate.postForEntity("http://localhost:8080/login", requestBody, String.class);
             System.out.println("Response Entity: " + responseEntity);
 
-            if (responseEntity.getStatusCode() != HttpStatus.OK) {
+            if (responseEntity.getStatusCode() != HttpStatus.OK || responseEntity.getBody() == null || !isValidResponse(responseEntity.getBody())) {
                 throw new BadCredentialsException("Invalid username or password");
             }
 
@@ -77,4 +77,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     public boolean supports(Class<?> authentication) {
         return authentication.equals(UsernamePasswordAuthenticationToken.class);
     }
+
+    private boolean isValidResponse(String responseBody) {     // Agrega la lógica para verificar si la respuesta indica éxito (puede ser un token o un indicador JSON)
+        return responseBody.contains("expectedIndicator"); // Reemplaza "expectedIndicator" con tu lógica específica
+    }
+
 }
