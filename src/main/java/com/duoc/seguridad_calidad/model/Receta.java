@@ -2,7 +2,7 @@ package com.duoc.seguridad_calidad.model;
 
 import lombok.Data;
 
-import java.util.List;
+
 
 @Data
 public class Receta {
