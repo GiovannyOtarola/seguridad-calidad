@@ -71,7 +71,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             return new UsernamePasswordAuthenticationToken(name, password, authorities);
 
         } catch (Exception ex) {
+            // Registrar el error con información adicional (nombre del usuario)
             logger.error("Error during authentication for user '{}': {}", authentication.getName(), ex.getMessage(), ex);
+            
+            // Lanza una excepción con un mensaje adecuado
             throw new BadCredentialsException("Invalid username or password", ex);
         }
     }
