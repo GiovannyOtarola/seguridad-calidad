@@ -1,7 +1,6 @@
 package com.duoc.seguridad_calidad.provider;
 
 import com.duoc.seguridad_calidad.model.TokenStore;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,7 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @Component
@@ -26,20 +26,21 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private final TokenStore tokenStore;
 
-    @Autowired
     public CustomAuthenticationProvider(TokenStore tokenStore) {
         this.tokenStore = tokenStore;
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(CustomAuthenticationProvider.class);
+    
     @Override
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
-        System.out.println("Llegué a Custom Authentication Provider");
+        logger.info("Llegué a Custom Authentication Provider");
 
         final String name = authentication.getName();
         final String password = authentication.getCredentials().toString();
 
-        System.out.println("Name: " + name);
-        System.out.println("Password: " + password);
+        logger.info("Name: {}", name);
+        logger.info("Password: {}", password);
 
         // Crea el cuerpo de la solicitud
         final MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
@@ -50,7 +51,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         try {
             // Realiza la llamada a la API de autenticación
             final var responseEntity = restTemplate.postForEntity("http://localhost:8080/login", requestBody, String.class);
-            System.out.println("Response Entity: " + responseEntity);
+            logger.info("Response Entity: {}", responseEntity);
 
 
 
@@ -60,7 +61,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
             // Guarda el token si la respuesta es exitosa
             tokenStore.setToken(responseEntity.getBody());
-            System.out.println("Token Store: " + tokenStore.getToken());
+            logger.info("Token Store: {}", tokenStore.getToken());
 
             // Configura las autoridades (roles)
             List<SimpleGrantedAuthority> authorities = new ArrayList<>();
@@ -70,7 +71,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             return new UsernamePasswordAuthenticationToken(name, password, authorities);
 
         } catch (Exception ex) {
-            System.out.println("Error during authentication: " + ex.getMessage());
+            logger.error("Error during authentication: {}", ex.getMessage(), ex);
             throw new BadCredentialsException("Invalid username or password", ex);
         }
     }

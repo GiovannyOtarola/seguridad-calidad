@@ -3,6 +3,7 @@ package com.duoc.seguridad_calidad.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import com.duoc.seguridad_calidad.model.Receta;
 
 
 @Controller
@@ -24,7 +27,7 @@ public class HomeController {
         final var restTemplate = new RestTemplate();
 
         // Realiza la solicitud GET al backend para obtener el mapa de respuesta
-        ResponseEntity<Map> response = restTemplate.exchange(url.concat("/public/home"), HttpMethod.GET, null, Map.class);
+    ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url.concat("/public/home"), HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {});
 
         // Extrae los datos del mapa
         Map<String, Object> responseBody = response.getBody();
@@ -54,7 +57,13 @@ public class HomeController {
                 .queryParam("dificultad", dificultad);
 
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<List> response = restTemplate.getForEntity(builder.toUriString(), List.class);
+        ResponseEntity<List<Receta>> response = restTemplate.exchange(
+            builder.toUriString(), 
+            HttpMethod.GET, 
+            null, 
+            new ParameterizedTypeReference<List<Receta>>() {}
+        );
+
 
         // Agrega los resultados al modelo para mostrar en la vista
         model.addAttribute("resultados", response.getBody());
