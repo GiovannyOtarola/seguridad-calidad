@@ -3,7 +3,7 @@ package com.duoc.seguridad_calidad.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -30,10 +30,16 @@ public class HomeController {
     String url = "http://localhost:8080";
 
     private TokenStore tokenStore;
+
+    private static final String VIEW_REGISTRO = "registro";
+    private static final String VIEW_PUBLICAR = "publicar";
+    private static final String VIEW_LOGIN = "login";
+    private static final String ERROR_ATTRIBUTE = "error";
+    private static final String MENSAJE_ATTRIBUTE = "mensaje";
+
     
-    @Autowired
-    public void RecetaController(TokenStore tokenStore) {
-        this.tokenStore = tokenStore;
+    public HomeController(TokenStore tokenStore) {
+        this.tokenStore = tokenStore; // Inyección de dependencias
     }
 
     @GetMapping("/home")
@@ -88,7 +94,7 @@ public class HomeController {
     @GetMapping("/registro")
     public String mostrarFormularioRegistro(Model model) {
         model.addAttribute("usuario", new User()); // Crea un usuario vacío para el formulario
-        return "registro"; // Debe coincidir con el nombre de tu plantilla HTML
+        return "VIEW_REGISTRO"; // Debe coincidir con el nombre de tu plantilla HTML
     }
 
     @PostMapping("/registro")
@@ -110,22 +116,22 @@ public class HomeController {
             );
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                model.addAttribute("mensaje", "Registro exitoso, por favor inicie sesión.");
-                return "login";  // Redirige al login después del registro exitoso
+                model.addAttribute(MENSAJE_ATTRIBUTE, "Registro exitoso, por favor inicie sesión.");
+                return VIEW_LOGIN;  // Redirige al login después del registro exitoso
             } else {
-                model.addAttribute("error", "Error al registrar el usuario.");
-                return "registro";  // Si hubo un error, vuelve a mostrar el formulario
+                model.addAttribute(ERROR_ATTRIBUTE, "Error al registrar el usuario.");
+                return VIEW_REGISTRO;  // Si hubo un error, vuelve a mostrar el formulario
             }
         } catch (Exception e) {
-            model.addAttribute("error", "Error al registrar el usuario: " + e.getMessage());
-            return "registro";  // Si hubo un error, vuelve a mostrar el formulario
+            model.addAttribute(ERROR_ATTRIBUTE, "Error al registrar el usuario: " + e.getMessage());
+            return VIEW_REGISTRO;  // Si hubo un error, vuelve a mostrar el formulario
         }
     }
 
     @GetMapping("/publicar")
     public String mostrarFormularioPublicar(Model model) {
         model.addAttribute("receta", new Receta()); // Crea un usuario vacío para el formulario
-        return "publicar"; 
+        return VIEW_PUBLICAR; 
     }
 
     @PostMapping("/publicar")
@@ -153,15 +159,15 @@ public class HomeController {
             );
 
             if (response.getStatusCode() == HttpStatus.CREATED) {
-                model.addAttribute("mensaje", "Receta creada exitosamente");
+                model.addAttribute(MENSAJE_ATTRIBUTE, "Receta creada exitosamente");
                 return "redirect:/home";
             } else {
-                model.addAttribute("error", "Error al crear la receta.");
-                return "publicar";
+                model.addAttribute(ERROR_ATTRIBUTE, "Error al crear la receta.");
+                return VIEW_PUBLICAR;
             }
         } catch (Exception e) {
-            model.addAttribute("error", "Error al registrar la receta: " + e.getMessage());
-            return "publicar";
+            model.addAttribute(ERROR_ATTRIBUTE, "Error al registrar la receta: " + e.getMessage());
+            return VIEW_PUBLICAR;
         }
     }
     
