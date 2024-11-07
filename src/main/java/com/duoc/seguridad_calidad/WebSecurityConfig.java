@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 
 @Configuration
-@EnableWebSecurity(debug = false)
+@EnableWebSecurity(debug = true)
 public class WebSecurityConfig {
 
 
@@ -31,7 +31,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http
             .authorizeHttpRequests(requests -> requests
-            .requestMatchers("/", "/home", "/buscar","/login","/images/**.jpg").permitAll()
+            .requestMatchers("/", "/home", "/buscar","/login","/registro","/images/**.jpg").permitAll()
             .requestMatchers("/recetas/**").authenticated() 
             .requestMatchers("/**.css").permitAll()
             .anyRequest().authenticated()
