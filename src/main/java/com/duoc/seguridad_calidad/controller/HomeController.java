@@ -114,6 +114,43 @@ public class HomeController {
             return "registro";  // Si hubo un error, vuelve a mostrar el formulario
         }
     }
+
+    @GetMapping("/publicar")
+    public String mostrarFormularioPublicar(Model model) {
+        model.addAttribute("receta", new Receta()); // Crea un usuario vacío para el formulario
+        return "publicar"; // Debe coincidir con el nombre de tu plantilla HTML
+    }
+
+    @PostMapping("/publicar")
+    public String registrarReceta(@ModelAttribute("receta") Receta receta, Model model) {
+        try {
+            // Realiza la solicitud POST al backend para registrar el usuario
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Convierte el objeto User a JSON
+            HttpEntity<Receta> request = new HttpEntity<>(receta, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                url.concat("/private/publicar"), 
+                HttpMethod.POST, 
+                request, 
+                String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                model.addAttribute("mensaje", "Receta creada");
+                return "home";  
+            } else {
+                model.addAttribute("error", "Error al registrar la receta.");
+                return "publicar";  // Si hubo un error, vuelve a mostrar el formulario
+            }
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al registrar la receta: " + e.getMessage());
+            return "publicar";  // Si hubo un error, vuelve a mostrar el formulario
+        }
+    }
     
     
 }
