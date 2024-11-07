@@ -29,40 +29,35 @@
                 <label for="nombre">Nombre de la receta:</label>
                 <input type="text" th:field="*{nombre}" placeholder="Ej: Ensalada César" required />
                 <br>
-
+            
                 <label for="ingredientes">Ingredientes:</label>
                 <textarea th:field="*{ingredientes}" placeholder="Ej: Lechuga, crutones, parmesano..." rows="4" required></textarea>
                 <br>
-
+            
                 <label for="instrucciones">Instrucciones de preparación:</label>
                 <textarea th:field="*{instrucciones}" placeholder="Describa los pasos..." rows="6" required></textarea>
                 <br>
-
+            
                 <label for="tipoCocina">Tipo de cocina:</label>
                 <input type="text" th:field="*{tipoCocina}" placeholder="Ej: Italiana" required />
                 <br>
-
+            
                 <label for="paisOrigen">País de origen:</label>
                 <input type="text" th:field="*{paisOrigen}" placeholder="Ej: Italia" required />
                 <br>
-
+            
                 <label for="tiempoCoccion">Tiempo de cocción (minutos):</label>
                 <input type="number" th:field="*{tiempoCoccion}" min="1" placeholder="Ej: 30" required />
                 <br>
-
+            
                 <label for="dificultad">Dificultad:</label>
-                <select th:field="*{dificultad}" required>
-                    <option value="" disabled selected>Seleccione una opción</option>
-                    <option value="Fácil">Fácil</option>
-                    <option value="Intermedia">Intermedia</option>
-                    <option value="Difícil">Difícil</option>
-                </select>
+                <input type="text" th:field="*{dificultad}" placeholder="Ej: Fácil" required />
                 <br>
-
+            
                 <label for="fotografiaUrl">URL de la fotografía:</label>
-                <input type="url" th:field="*{fotografiaUrl}" placeholder="Ej: https://example.com/foto.jpg" />
+                <input type="text" th:field="*{fotografiaUrl}" placeholder="Ej: https://example.com/foto.jpg" />
                 <br>
-
+            
                 <button type="submit">Publicar Receta</button>
             </form>
         </section>

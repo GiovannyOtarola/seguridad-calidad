@@ -18,7 +18,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import com.duoc.seguridad_calidad.model.Receta;
 import com.duoc.seguridad_calidad.model.User;
 
@@ -124,14 +123,16 @@ public class HomeController {
     @PostMapping("/publicar")
     public String registrarReceta(@ModelAttribute("receta") Receta receta, Model model) {
         try {
-            // Realiza la solicitud POST al backend para registrar el usuario
             RestTemplate restTemplate = new RestTemplate();
+
+            // Crear encabezados para enviar JSON
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            // Convierte el objeto User a JSON
+            // Crear la entidad de la solicitud
             HttpEntity<Receta> request = new HttpEntity<>(receta, headers);
 
+            // Enviar solicitud al backend
             ResponseEntity<String> response = restTemplate.exchange(
                 url.concat("/private/publicar"), 
                 HttpMethod.POST, 
@@ -139,16 +140,16 @@ public class HomeController {
                 String.class
             );
 
-            if (response.getStatusCode() == HttpStatus.OK) {
-                model.addAttribute("mensaje", "Receta creada");
-                return "home";  
+            if (response.getStatusCode() == HttpStatus.CREATED) {
+                model.addAttribute("mensaje", "Receta creada exitosamente");
+                return "home";
             } else {
-                model.addAttribute("error", "Error al registrar la receta.");
-                return "publicar";  // Si hubo un error, vuelve a mostrar el formulario
+                model.addAttribute("error", "Error al crear la receta.");
+                return "publicar";
             }
         } catch (Exception e) {
             model.addAttribute("error", "Error al registrar la receta: " + e.getMessage());
-            return "publicar";  // Si hubo un error, vuelve a mostrar el formulario
+            return "publicar";
         }
     }
     
