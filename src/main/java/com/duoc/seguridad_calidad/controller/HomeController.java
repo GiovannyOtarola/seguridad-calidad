@@ -3,6 +3,7 @@ package com.duoc.seguridad_calidad.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import com.duoc.seguridad_calidad.model.Receta;
+import com.duoc.seguridad_calidad.model.TokenStore;
 import com.duoc.seguridad_calidad.model.User;
 
 
@@ -27,6 +29,12 @@ public class HomeController {
 
     String url = "http://localhost:8080";
 
+    private TokenStore tokenStore;
+    
+    @Autowired
+    public void RecetaController(TokenStore tokenStore) {
+        this.tokenStore = tokenStore;
+    }
 
     @GetMapping("/home")
     public String home(Model model) {
@@ -117,7 +125,7 @@ public class HomeController {
     @GetMapping("/publicar")
     public String mostrarFormularioPublicar(Model model) {
         model.addAttribute("receta", new Receta()); // Crea un usuario vacío para el formulario
-        return "publicar"; // Debe coincidir con el nombre de tu plantilla HTML
+        return "publicar"; 
     }
 
     @PostMapping("/publicar")
@@ -128,6 +136,10 @@ public class HomeController {
             // Crear encabezados para enviar JSON
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Obtener el token del TokenStore
+            String token = tokenStore.getToken(); 
+            headers.set("Authorization", "Bearer " + token);
 
             // Crear la entidad de la solicitud
             HttpEntity<Receta> request = new HttpEntity<>(receta, headers);
@@ -142,7 +154,7 @@ public class HomeController {
 
             if (response.getStatusCode() == HttpStatus.CREATED) {
                 model.addAttribute("mensaje", "Receta creada exitosamente");
-                return "home";
+                return "redirect:/home";
             } else {
                 model.addAttribute("error", "Error al crear la receta.");
                 return "publicar";
