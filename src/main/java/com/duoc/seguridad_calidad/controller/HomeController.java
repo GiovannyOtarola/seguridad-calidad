@@ -94,7 +94,7 @@ public class HomeController {
     @GetMapping("/registro")
     public String mostrarFormularioRegistro(Model model) {
         model.addAttribute("usuario", new User()); // Crea un usuario vacío para el formulario
-        return "VIEW_REGISTRO"; // Debe coincidir con el nombre de tu plantilla HTML
+        return VIEW_REGISTRO; // Debe coincidir con el nombre de tu plantilla HTML
     }
 
     @PostMapping("/registro")
