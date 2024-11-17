@@ -116,12 +116,12 @@
                 <label for="valoracion" class="form-label">Valoración (1 a 5):</label>
                 <input type="number" id="valoracion" name="valoracion" class="form-control" min="1" max="5" required>
             </div>
-        
+
             <div class="mb-3">
                 <label for="comentario" class="form-label">Comentario:</label>
                 <textarea id="comentario" name="comentario" class="form-control" rows="4" required></textarea>
             </div>
-        
+
             <button type="submit" class="btn btn-primary">Guardar</button>
         </form>
     </div>
@@ -158,6 +158,23 @@
                 </div>
             </form>
         </div>
+    </div>
+
+
+</div>
+<!-- Lista de comentarios y valoraciones -->
+<div class="mt-4">
+    <h3>Comentarios y Valoraciones</h3>
+    <div>
+        <ul class="list-group">
+            <li class="list-group-item" th:each="comentario : ${comentarios}">
+                <p><strong>Valoración:</strong> <span th:text="${comentario.valoracion}">Valoración</span></p>
+                <p><strong>Comentario:</strong> <span th:text="${comentario.comentario}">Comentario</span></p>
+            </li>
+        </ul>
+    </div>
+    <div th:if="${#lists.isEmpty(comentarios)}">
+        <p class="text-muted">No hay comentarios ni valoraciones aún.</p>
     </div>
 </div>
 

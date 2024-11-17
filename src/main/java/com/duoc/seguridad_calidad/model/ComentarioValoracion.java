@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter@Setter
 public class ComentarioValoracion  {
-    
+    private Long id;
     private Long recetaId;
     private Integer valoracion;
     private String comentario;

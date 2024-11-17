@@ -5,6 +5,7 @@ import com.duoc.seguridad_calidad.model.ComentarioValoracion;
 import com.duoc.seguridad_calidad.model.ComentarioValoracionView;
 import com.duoc.seguridad_calidad.model.Receta;
 import com.duoc.seguridad_calidad.model.TokenStore;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 public class DetalleController {
@@ -45,14 +48,27 @@ public class DetalleController {
 
         // Construir la URL para la receta específica
         String detalleUrl = url + "/private/recetas/" + id + "/detalle";
+        String comentarioValoracionUrl = url + "/private/recetas/" + id + "/comentariosValoracion";
 
         try {
             // Hacer la solicitud GET al backend y parsear la respuesta como un objeto de tipo Receta
             ResponseEntity<Receta> response = restTemplate.exchange(detalleUrl, HttpMethod.GET, entity, Receta.class);
 
+            ResponseEntity<List<ComentarioValoracion>> responseComentario = restTemplate.exchange(
+                    "http://localhost:8080/private/receta/"+id+"/comentariosValoracion",
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<List<ComentarioValoracion>>() {}
+            );
+            List<ComentarioValoracion> comentarios = responseComentario.getBody();
+
+
+
+
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 // Pasar los detalles de la receta a la vista
                 model.addAttribute("detalles", response.getBody());
+                model.addAttribute("comentarios",comentarios);
             } else {
                 model.addAttribute("error", "No se pudieron obtener los detalles de la receta.");
             }
