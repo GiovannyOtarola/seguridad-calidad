@@ -127,7 +127,7 @@ public class DetalleController {
         }
 
         // Redirige de nuevo al detalle de la receta
-        return "redirect:/recetas/" + id + DETAIL_PATH;
+        return "redirect:/recetas/" + id + "/detalle";
     }
 
 
@@ -166,7 +166,7 @@ public class DetalleController {
                     ComentarioValoracionView.class);
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE, "Comentario y valoración guardados correctamente.");
+                redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "Comentario y valoración guardados correctamente.");
             } else {
                 redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "Error al guardar el comentario y valoración.");
             }
@@ -175,7 +175,7 @@ public class DetalleController {
         }
 
         // Redirigir de vuelta al detalle de la receta
-        return "redirect:/recetas/" + id + DETAIL_PATH;
+        return "redirect:/recetas/" + id + "/detalle";
     }
 
 }
