@@ -32,6 +32,13 @@ public class DetalleController {
 
     private TokenStore tokenStore;
 
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String BEARER_PREFIX = "Bearer ";
+    public static final String PRIVATE_RECIPES_BASE = "/private/recetas/";
+    public static final String DETAIL_PATH = "/detalle";
+    public static final String ERROR_MESSAGE = "errorMessage";
+    public static final String SUCCESS_MESSAGE = "successMessage";
+
     public DetalleController(TokenStore tokenStore) {
         super();
         this.tokenStore = tokenStore;
@@ -43,12 +50,12 @@ public class DetalleController {
         final var restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
 
-        headers.set("Authorization", "Bearer " + this.tokenStore.getToken());  // Agregar prefijo "Bearer "
+        headers.set(AUTHORIZATION_HEADER, BEARER_PREFIX + this.tokenStore.getToken());  // Agregar prefijo "Bearer "
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         // Construir la URL para la receta específica
-        String detalleUrl = url + "/private/recetas/" + id + "/detalle";
-        String comentarioValoracionUrl = url + "/private/receta/" + id + "/comentariosValoracion";
+        String detalleUrl = url + PRIVATE_RECIPES_BASE + id + DETAIL_PATH;
+        String comentarioValoracionUrl = url + PRIVATE_RECIPES_BASE + id + "/comentariosValoracion";
 
         try {
             // Hacer la solicitud GET al backend y parsear la respuesta como un objeto de tipo Receta
@@ -93,7 +100,7 @@ public class DetalleController {
 
             // Obtener el token del TokenStore
             String token = tokenStore.getToken(); 
-            headers.set("Authorization", "Bearer " + token);
+            headers.set(AUTHORIZATION_HEADER, BEARER_PREFIX + token);
 
             // Construir el cuerpo de la solicitud
             MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
@@ -103,7 +110,7 @@ public class DetalleController {
             HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
 
             // Enviar solicitud POST al backend
-            String backendUrl = url.concat("/private/recetas/" + id + "/agregarVideo");
+            String backendUrl = url.concat(PRIVATE_RECIPES_BASE + id + "/agregarVideo");
             ResponseEntity<String> response = restTemplate.exchange(
                     backendUrl, 
                     HttpMethod.POST, 
@@ -111,16 +118,16 @@ public class DetalleController {
                     String.class);
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                redirectAttributes.addFlashAttribute("successMessage", "Video agregado exitosamente.");
+                redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE, "Video agregado exitosamente.");
             } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "Error al agregar el video.");
+                redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "Error al agregar el video.");
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al agregar el video: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "Error al agregar el video: " + e.getMessage());
         }
 
         // Redirige de nuevo al detalle de la receta
-        return "redirect:/recetas/" + id + "/detalle";
+        return "redirect:/recetas/" + id + DETAIL_PATH;
     }
 
 
@@ -139,7 +146,7 @@ public class DetalleController {
 
             // Obtener el token del TokenStore
             String token = tokenStore.getToken(); 
-            headers.set("Authorization", "Bearer " + token);
+            headers.set(AUTHORIZATION_HEADER, BEARER_PREFIX + token);
 
             // Crear el cuerpo de la solicitud con los valores recibidos
             ComentarioValoracion comentarioValoracion = new ComentarioValoracion();
@@ -151,7 +158,7 @@ public class DetalleController {
             HttpEntity<ComentarioValoracion> requestEntity = new HttpEntity<>(comentarioValoracion, headers);
 
             // Enviar la solicitud POST al backend
-            String backendUrl = url.concat("/private/recetas/" + id + "/guardarComentarioValoracion");
+            String backendUrl = url.concat(PRIVATE_RECIPES_BASE + id + "/guardarComentarioValoracion");
             ResponseEntity<ComentarioValoracionView> response = restTemplate.exchange(
                     backendUrl, 
                     HttpMethod.POST, 
@@ -159,16 +166,16 @@ public class DetalleController {
                     ComentarioValoracionView.class);
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                redirectAttributes.addFlashAttribute("successMessage", "Comentario y valoración guardados correctamente.");
+                redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE, "Comentario y valoración guardados correctamente.");
             } else {
-                redirectAttributes.addFlashAttribute("errorMessage", "Error al guardar el comentario y valoración.");
+                redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "Error al guardar el comentario y valoración.");
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al guardar el comentario y valoración: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(ERROR_MESSAGE, "Error al guardar el comentario y valoración: " + e.getMessage());
         }
 
         // Redirigir de vuelta al detalle de la receta
-        return "redirect:/recetas/" + id + "/detalle";
+        return "redirect:/recetas/" + id + DETAIL_PATH;
     }
 
 }
