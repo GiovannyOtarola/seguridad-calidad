@@ -127,7 +127,7 @@ public class DetalleController {
         }
 
         // Redirige de nuevo al detalle de la receta
-        return "redirect:/recetas/" + id + "/detalle";
+        return "redirect:/recetas/" + id + DETAIL_PATH;
     }
 
 
@@ -175,7 +175,7 @@ public class DetalleController {
         }
 
         // Redirigir de vuelta al detalle de la receta
-        return "redirect:/recetas/" + id + "/detalle";
+        return "redirect:/recetas/" + id + DETAIL_PATH;
     }
 
 }
