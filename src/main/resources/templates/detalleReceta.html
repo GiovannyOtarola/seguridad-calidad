@@ -103,6 +103,9 @@
         </div>
     </div>
 
+    <button class="btn btn-success mt-3" onclick="copiarURL()">
+        Compartir
+    </button>
     <!-- Botón para abrir el modal -->
     <button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#videoModal">
         Agregar Video
@@ -179,5 +182,21 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"  crossorigin="anonymous"></script>
+<script>
+    function copiarURL() {
+        // Obtén la URL actual
+        const url = window.location.href;
+
+        // Usa la API del portapapeles para copiar
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                alert("URL copiada compartelo en redes sociales :)");
+            })
+            .catch(err => {
+                console.error("Error al copiar la URL: ", err);
+                alert("Hubo un error al copiar la URL.");
+            });
+    }
+</script>
 </body>
 </html>

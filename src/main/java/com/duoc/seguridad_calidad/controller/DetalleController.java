@@ -48,14 +48,14 @@ public class DetalleController {
 
         // Construir la URL para la receta específica
         String detalleUrl = url + "/private/recetas/" + id + "/detalle";
-        String comentarioValoracionUrl = url + "/private/recetas/" + id + "/comentariosValoracion";
+        String comentarioValoracionUrl = url + "/private/receta/" + id + "/comentariosValoracion";
 
         try {
             // Hacer la solicitud GET al backend y parsear la respuesta como un objeto de tipo Receta
             ResponseEntity<Receta> response = restTemplate.exchange(detalleUrl, HttpMethod.GET, entity, Receta.class);
 
             ResponseEntity<List<ComentarioValoracion>> responseComentario = restTemplate.exchange(
-                    "http://localhost:8080/private/receta/"+id+"/comentariosValoracion",
+                    comentarioValoracionUrl,
                     HttpMethod.GET,
                     entity,
                     new ParameterizedTypeReference<List<ComentarioValoracion>>() {}
