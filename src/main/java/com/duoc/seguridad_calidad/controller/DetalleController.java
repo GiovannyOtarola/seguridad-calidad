@@ -55,7 +55,7 @@ public class DetalleController {
 
         // Construir la URL para la receta específica
         String detalleUrl = url + PRIVATE_RECIPES_BASE + id + DETAIL_PATH;
-        String comentarioValoracionUrl = url + PRIVATE_RECIPES_BASE + id + "/comentariosValoracion";
+        String comentarioValoracionUrl = url + "/private/receta/" + id + "/comentariosValoracion";
 
         try {
             // Hacer la solicitud GET al backend y parsear la respuesta como un objeto de tipo Receta
