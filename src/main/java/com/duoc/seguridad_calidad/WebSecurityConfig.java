@@ -1,6 +1,8 @@
 package com.duoc.seguridad_calidad;
 
 import com.duoc.seguridad_calidad.provider.CustomAuthenticationProvider;
+import com.duoc.seguridad_calidad.provider.CustomAuthenticationSuccessHandler;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,7 +17,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity(debug = true)
 public class WebSecurityConfig {
 
+     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
+     public WebSecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) {
+        this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, CustomAuthenticationProvider authProvider) throws Exception {
@@ -32,6 +38,7 @@ public class WebSecurityConfig {
         http
             .authorizeHttpRequests(requests -> requests
             .requestMatchers("/", "/home", "/buscar","/login","/registro","/images/**.jpg").permitAll()
+            .requestMatchers("/admin").hasRole("ADMIN")
             .requestMatchers("/recetas/**").authenticated() 
             .requestMatchers("/**.css").permitAll()
             .anyRequest().authenticated()
@@ -41,6 +48,7 @@ public class WebSecurityConfig {
             .defaultSuccessUrl("/home", true)
             .failureUrl("/login?error=true")
             .permitAll()
+            .successHandler(customAuthenticationSuccessHandler)
         )
         .logout(LogoutConfigurer::permitAll);
 

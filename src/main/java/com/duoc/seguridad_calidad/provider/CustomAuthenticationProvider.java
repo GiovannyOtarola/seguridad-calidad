@@ -1,7 +1,9 @@
 package com.duoc.seguridad_calidad.provider;
 
+import com.duoc.seguridad_calidad.model.AuthResponse;
 import com.duoc.seguridad_calidad.model.TokenStore;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,7 +34,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomAuthenticationProvider.class);
     
-    @Override
+     @Override
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
         logger.info("Llegué a Custom Authentication Provider");
 
@@ -50,30 +52,34 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         final var restTemplate = new RestTemplate();
         try {
             // Realiza la llamada a la API de autenticación
-            final var responseEntity = restTemplate.postForEntity("http://localhost:8080/login", requestBody, String.class);
+            final ResponseEntity<AuthResponse> responseEntity = restTemplate.postForEntity("http://localhost:8080/login", requestBody, AuthResponse.class);
             logger.info("Response Entity: {}", responseEntity);
-
-
-
+            
             if (responseEntity.getStatusCode() != HttpStatus.OK) {
                 throw new BadCredentialsException("Invalid username or password");
             }
 
+            // Obtiene el cuerpo de la respuesta
+            AuthResponse authResponse = responseEntity.getBody();
+            if (authResponse == null || authResponse.getToken() == null) {
+                throw new BadCredentialsException("Invalid username or password");
+            }
+
             // Guarda el token si la respuesta es exitosa
-            tokenStore.setToken(responseEntity.getBody());
+            tokenStore.setToken(authResponse.getToken());
             logger.info("Token Store: {}", tokenStore.getToken());
 
             // Configura las autoridades (roles)
             List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+            String role = authResponse.getRole() != null ? authResponse.getRole() : "ROLE_USER"; // Default role
+            authorities.add(new SimpleGrantedAuthority(role));
 
             // Retorna el token de autenticación
             return new UsernamePasswordAuthenticationToken(name, password, authorities);
 
         } catch (Exception ex) {
-            
             throw new BadCredentialsException(
-            "Invalid username or password for user: " + authentication.getName(), ex);
+                "Invalid username or password for user: " + authentication.getName(), ex);
         }
     }
 

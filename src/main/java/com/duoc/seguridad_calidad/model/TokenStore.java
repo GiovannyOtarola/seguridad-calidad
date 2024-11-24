@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class TokenStore {
 
     private String token;
-
+    
     public String getToken() {
         return token;
     }

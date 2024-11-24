@@ -32,6 +32,7 @@ public class HomeController {
     String url = "http://localhost:8080";
 
     private TokenStore tokenStore;
+    
 
     private static final String VIEW_REGISTRO = "registro";
     private static final String VIEW_PUBLICAR = "publicar";
@@ -42,7 +43,10 @@ public class HomeController {
     
     public HomeController(TokenStore tokenStore) {
         this.tokenStore = tokenStore; // Inyección de dependencias
+        
     }
+
+    
 
     @GetMapping("/home")
     public String home(Model model) {
@@ -171,6 +175,11 @@ public class HomeController {
             model.addAttribute(ERROR_ATTRIBUTE, "Error al registrar la receta: " + e.getMessage());
             return VIEW_PUBLICAR;
         }
+    }
+
+    @GetMapping("/admin")
+    public String admin() {
+        return "admin"; 
     }
     
     
