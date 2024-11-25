@@ -14,11 +14,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.ui.Model;
 
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import com.duoc.seguridad_calidad.model.Receta;
@@ -178,9 +180,81 @@ public class HomeController {
     }
 
     @GetMapping("/admin")
-    public String admin() {
-        return "admin"; 
+    public String admin(Model model) {
+        final var restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+
+        // Agregar prefijo "Bearer " con espacio entre "Bearer" y el token
+        headers.set("Authorization",this.tokenStore.getToken()); 
+
+        try {
+            // Realiza la solicitud GET al backend para obtener la lista de usuarios
+            HttpEntity<?> requestEntity = new HttpEntity<>(headers);  // Crear entidad con encabezados
+            ResponseEntity<List<User>> response = restTemplate.exchange(
+                url.concat("/private/users"),  // URL del backend para obtener usuarios
+                HttpMethod.GET, 
+                requestEntity, 
+                new ParameterizedTypeReference<List<User>>() {}
+            );
+
+            // Agregar los usuarios obtenidos al modelo
+            model.addAttribute("usuarios", response.getBody());
+        } catch (Exception e) {
+            model.addAttribute(ERROR_ATTRIBUTE, "Error al obtener usuarios: " + e.getMessage());
+            return "admin";  // Regresar a la página de administración en caso de error
+        }
+
+        return "admin";  // Si todo sale bien, se devuelve la vista "admin"
     }
-    
-    
+
+    @PostMapping("/admin/users/{id}")
+    public String actualizarUsuario(@PathVariable("id") Integer id, @ModelAttribute("usuario") User user, Model model) {
+        try {
+            // Realiza la solicitud PUT al backend para actualizar el usuario
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Obtener el token del TokenStore
+            String token = tokenStore.getToken();
+            if (token == null || token.isEmpty()) {
+                model.addAttribute(ERROR_ATTRIBUTE, "Token de autenticación no disponible.");
+                return "login"; // Redirigir a la página de login si no hay token
+            }
+            headers.set("Authorization", "Bearer " + token);
+
+            // Convierte el objeto User a JSON
+            HttpEntity<User> request = new HttpEntity<>(user, headers);
+
+            // Construir la URL completa utilizando la base de la URL y el id
+            String url = "http://localhost:8080"; // URL base
+            String endpoint = "/private/users/" + id; // Endpoint con id
+            String fullUrl = url + endpoint; // Concatenamos la base con el endpoint
+
+            // Llama al endpoint de actualización del usuario
+            ResponseEntity<String> response = restTemplate.exchange(
+                fullUrl,
+                HttpMethod.PUT,
+                request,
+                String.class
+            );
+
+            // Verifica el estado de la respuesta
+            if (response.getStatusCode() == HttpStatus.OK) {
+                model.addAttribute(MENSAJE_ATTRIBUTE, "Usuario actualizado exitosamente.");
+                return "redirect:/admin"; // Redirige a la página de administración después de la actualización
+            } else {
+                model.addAttribute(ERROR_ATTRIBUTE, "Error al actualizar el usuario.");
+                return "admin"; // Si hubo un error, vuelve a mostrar la página de administración
+            }
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            // Manejo de errores específicos HTTP
+            model.addAttribute(ERROR_ATTRIBUTE, "Error al conectar con el servidor: " + e.getStatusCode());
+            return "admin"; // Muestra la página de administración con el mensaje de error
+        } catch (Exception e) {
+            // Manejo de errores generales
+            model.addAttribute(ERROR_ATTRIBUTE, "Error al actualizar el usuario: " + e.getMessage());
+            return "admin"; // Vuelve a mostrar la página de administración
+        }
+    }
 }

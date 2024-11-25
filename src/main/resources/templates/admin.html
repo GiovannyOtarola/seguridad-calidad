@@ -1,10 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Admin Page</title>
+    <title>Administración</title>
 </head>
 <body>
-    <h1>Welcome, Admin!</h1>
-    <p>Only admin can see this page.</p>
+    <h1>Administración de Usuarios</h1>
+
+    <!-- Mensajes de error o éxito -->
+    <div th:if="${error}" style="color: red;" th:text="${error}"></div>
+    <div th:if="${mensaje}" style="color: green;" th:text="${mensaje}"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="usuario : ${usuarios}">
+                <td th:text="${usuario.id}"></td>
+                <td th:text="${usuario.username}"></td>
+                <td th:text="${usuario.email}"></td>
+                <td>
+                    <!-- Formulario para editar usuario -->
+                    <form th:action="@{/admin/users/{id}(id=${usuario.id})}" method="post">
+                        <!-- Datos del usuario -->
+                        <input type="hidden" name="id" th:value="${usuario.id}"/>
+                        <input type="text" name="username" th:value="${usuario.username}" required/>
+                        <input type="email" name="email" th:value="${usuario.email}" required/>
+                        <input type="text" name="name" th:value="${usuario.name}" required/>
+                        
+                        <!-- Campo para seleccionar el rol -->
+                        <select name="role" th:value="${usuario.role}">
+                            <option value="ROLE_USER" th:selected="${usuario.role == 'ROLE_USER'}">Usuario</option>
+                            <option value="ROLE_ADMIN" th:selected="${usuario.role == 'ROLE_ADMIN'}">Administrador</option>
+                        </select>
+                        
+                        <button type="submit">Actualizar</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </body>
 </html>
