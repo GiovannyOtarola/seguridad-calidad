@@ -24,6 +24,9 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+
+import com.duoc.seguridad_calidad.model.ComentarioValoracionDTO;
 import com.duoc.seguridad_calidad.model.Receta;
 import com.duoc.seguridad_calidad.model.TokenStore;
 import com.duoc.seguridad_calidad.model.User;
@@ -249,5 +252,76 @@ public class HomeController {
         }
 
         return VIEW_ADMIN; // Muestra nuevamente la página de administración con el error
+    }
+
+    @GetMapping("/comentarios")
+    public String comentarios(Model model) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            String token = tokenStore.getToken();
+            if (token != null && !token.isEmpty()) {
+                headers.set("Authorization", "Bearer " + token);
+            }
+
+            HttpEntity<?> requestEntity = new HttpEntity<>(headers);
+            ResponseEntity<List<ComentarioValoracionDTO>> response = restTemplate.exchange(
+                url.concat("/private/comentarios"),
+                HttpMethod.GET,
+                requestEntity,
+                new ParameterizedTypeReference<List<ComentarioValoracionDTO>>() {}
+            );
+
+            // Agrega los usuarios obtenidos al modelo
+            model.addAttribute("comentarios", response.getBody());
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            model.addAttribute(ERROR_ATTRIBUTE, "Error al cargar los comentarios: " + e.getStatusCode());
+        } catch (Exception e) {
+            model.addAttribute(ERROR_ATTRIBUTE, "Error inesperado al cargar los comentarios: " + e.getMessage());
+        }
+
+        return "comentarios";
+    }
+
+    @PostMapping("/admin/comentarios/{id}")
+    public String actualizarComentarios(@PathVariable("id") Long id, @ModelAttribute("comentario") ComentarioValoracionDTO comentarioValoracion, Model model) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            // Crear encabezados con token de autenticación
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            String token = tokenStore.getToken();
+            if (token != null && !token.isEmpty()) {
+                headers.set("Authorization", "Bearer " + token);
+            } else {
+                model.addAttribute(ERROR_ATTRIBUTE, "Token de autenticación no disponible.");
+                return VIEW_LOGIN; // Redirigir al login si no hay token
+            }
+
+            // Crear la entidad de la solicitud
+            HttpEntity<ComentarioValoracionDTO> request = new HttpEntity<>(comentarioValoracion, headers);
+
+            // Llama al endpoint de actualización
+            ResponseEntity<String> response = restTemplate.exchange(
+                url.concat("/private/comentarios/").concat(id.toString()),
+                HttpMethod.PUT,
+                request,
+                String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                model.addAttribute(MENSAJE_ATTRIBUTE, "comentario actualizado exitosamente.");
+                return "redirect:/comentarios"; 
+            } else {
+                model.addAttribute(ERROR_ATTRIBUTE, "Error al actualizar el comentario.");
+            }
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            model.addAttribute(ERROR_ATTRIBUTE, "Error HTTP: " + e.getStatusCode());
+        } catch (Exception e) {
+            model.addAttribute(ERROR_ATTRIBUTE, "Error inesperado: " + e.getMessage());
+        }
+
+        return "comentarios"; // Muestra nuevamente la página de administración con el error
     }
 }
