@@ -14,12 +14,16 @@ public class User {
     private String role;
 
     
-    public User() {}
+    public User(int i, String string, String string2, String string3, String string4) {}
 
     public User(String username, String name, String email, String password) {
         this.username = username;
         this.name = name;
         this.email = email;
         this.password = password;
+    }
+
+    public User() {
+        //TODO Auto-generated constructor stub
     }
 }

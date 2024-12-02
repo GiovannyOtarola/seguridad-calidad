@@ -13,6 +13,10 @@ public class Banner {
         this.enlaceUrl = enlaceUrl;
     }
 
+    public Banner() {
+        //TODO Auto-generated constructor stub
+    }
+
     // Getters y Setters
     public String getNombre() {
         return nombre;

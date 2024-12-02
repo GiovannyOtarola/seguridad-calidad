@@ -38,8 +38,6 @@ public class HomeController {
     String url = "http://localhost:8080";
 
     private TokenStore tokenStore;
-    
-
     private static final String VIEW_REGISTRO = "registro";
     private static final String VIEW_PUBLICAR = "publicar";
     private static final String VIEW_LOGIN = "login";
@@ -47,9 +45,8 @@ public class HomeController {
     private static final String MENSAJE_ATTRIBUTE = "mensaje";
     private static final String VIEW_ADMIN = "admin";
     
-    public HomeController(TokenStore tokenStore) {
+    public HomeController(TokenStore tokenStore, RestTemplate restTemplate) {
         this.tokenStore = tokenStore; // Inyección de dependencias
-        
     }
 
     
