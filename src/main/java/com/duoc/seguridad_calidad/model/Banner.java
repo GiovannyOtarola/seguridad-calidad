@@ -14,7 +14,7 @@ public class Banner {
     }
 
     public Banner() {
-        //TODO Auto-generated constructor stub
+        
     }
 
     // Getters y Setters

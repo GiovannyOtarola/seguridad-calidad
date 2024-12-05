@@ -45,7 +45,7 @@ public class HomeController {
     private static final String MENSAJE_ATTRIBUTE = "mensaje";
     private static final String VIEW_ADMIN = "admin";
     
-    public HomeController(TokenStore tokenStore, RestTemplate restTemplate) {
+    public HomeController(TokenStore tokenStore) {
         this.tokenStore = tokenStore; // Inyección de dependencias
     }
 

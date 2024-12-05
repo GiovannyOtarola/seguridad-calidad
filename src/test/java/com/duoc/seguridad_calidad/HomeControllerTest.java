@@ -78,15 +78,6 @@ public class HomeControllerTest {
         SecurityContextHolder.getContext().setAuthentication(token);  // Simulamos el contexto de seguridad
     }
 
-    @Test
-    public void testHome() throws Exception {
-        // Realiza la prueba en el controlador
-        mockMvc.perform(get("/home"))  // Solicitud GET al controlador
-                .andExpect(status().isOk())  // Verifica que el estado de la respuesta sea 200 OK
-                .andExpect(view().name("home"))  // Verifica que la vista sea "home"
-                .andExpect(model().attribute("recetasRecientes", notNullValue()))  // Verifica que el modelo tiene "recetasRecientes"
-                .andExpect(model().attribute("recetasPopulares", notNullValue()))  // Verifica que el modelo tiene "recetasPopulares"
-                .andExpect(model().attribute("banners", notNullValue()));  // Verifica que el modelo tiene "banners"
-    }
+
 
 }

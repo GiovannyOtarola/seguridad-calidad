@@ -9,9 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.client.RestTemplate;
 
+import com.duoc.seguridad_calidad.model.AuthResponse;
 import com.duoc.seguridad_calidad.model.TokenStore;
 import com.duoc.seguridad_calidad.provider.CustomAuthenticationProvider;
 
@@ -22,13 +23,21 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
+
 public class CustomAuthenticationProviderTest {
     
+    @InjectMocks
+    private CustomAuthenticationProvider authenticationProvider;
+
     @Mock
     private RestTemplate restTemplate;
 
     @Mock
     private TokenStore tokenStore;
+
+    @Mock
+    private AuthResponse authResponse;
 
     @InjectMocks
     private CustomAuthenticationProvider customAuthenticationProvider;
@@ -86,4 +95,6 @@ public class CustomAuthenticationProviderTest {
         assertTrue(customAuthenticationProvider.supports(UsernamePasswordAuthenticationToken.class));
         assertFalse(customAuthenticationProvider.supports(Object.class));
     }
+
+
 }
