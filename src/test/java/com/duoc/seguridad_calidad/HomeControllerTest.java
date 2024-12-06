@@ -1,83 +1,89 @@
 package com.duoc.seguridad_calidad;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.duoc.seguridad_calidad.controller.HomeController;
+import com.duoc.seguridad_calidad.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.ui.Model;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.WebApplicationContext;
-
-import com.duoc.seguridad_calidad.controller.HomeController;
-import com.duoc.seguridad_calidad.model.Banner;
-import com.duoc.seguridad_calidad.model.Receta;
-import com.duoc.seguridad_calidad.model.TokenStore;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model; // Import for model assertions
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(HomeController.class)
 public class HomeControllerTest {
-    
-    
+
     @Autowired
-    private MockMvc mockMvc;  // MockMvc para simular las solicitudes HTTP
+    private MockMvc mockMvc;  // Usamos MockMvc para pruebas de controladores
 
     @MockBean
-    private RestTemplate restTemplate;  // Mockeamos RestTemplate para evitar llamadas reales
+    private TokenStore tokenStore;
 
     @MockBean
-    private AuthenticationManager authenticationManager;  // Mockeamos AuthenticationManager si es necesario
+    private RestTemplate restTemplate; 
 
-    @BeforeEach
-    public void setUp() {
-        // Simulamos la respuesta del backend
+
+
+    @Test
+    @WithMockUser(username = "testUser", roles = {"USER"}) // Simula un usuario autenticado con un rol
+    public void testHome_Success() throws Exception {
+        // Datos mockeados que devolveremos en la respuesta
         Map<String, Object> mockResponse = new HashMap<>();
-        mockResponse.put("recetasRecientes", Collections.singletonList(new Receta()));  // Mock de recetas recientes
-        mockResponse.put("recetasPopulares", Collections.singletonList(new Receta()));  // Mock de recetas populares
-        mockResponse.put("banners", Collections.singletonList(new Banner()));  // Mock de banners
+        mockResponse.put("recetasRecientes", Collections.emptyList());
+        mockResponse.put("recetasPopulares", Collections.emptyList());
+        mockResponse.put("banners", Collections.emptyList());
 
-        // Simulamos el comportamiento del RestTemplate para que devuelva el resultado mockeado
+        // Configuramos el mock para el RestTemplate para evitar la conexión real
         when(restTemplate.exchange(
-                ArgumentMatchers.contains("/home"), // URL que estamos simulando
-                ArgumentMatchers.any(HttpMethod.class),
-                ArgumentMatchers.any(HttpEntity.class),
-                ArgumentMatchers.<ParameterizedTypeReference<Map<String, Object>>>any()))
-                .thenReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK));
+                eq("http://localhost:8080/public/home"),
+                eq(HttpMethod.GET),
+                any(),
+                eq(new ParameterizedTypeReference<Map<String, Object>>() {}))
+        ).thenReturn(ResponseEntity.ok(mockResponse));  // Respuesta mockeada
 
-        // Simulamos la autenticación si es necesario
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("testUser", "password", Collections.emptyList());
-        SecurityContextHolder.getContext().setAuthentication(token);  // Simulamos el contexto de seguridad
+        // Realizamos la solicitud al controlador usando MockMvc
+        mockMvc.perform(get("/home")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer fake-jwt-token-with-role")) // Simula el encabezado de autenticación
+                .andExpect(status().isOk())
+                .andExpect(view().name("home"))
+                .andExpect(model().attribute("recetasRecientes", hasSize(0)))  // Verifica que la lista esté vacía
+                .andExpect(model().attribute("recetasPopulares", hasSize(0)))  // Verifica que la lista esté vacía
+                .andExpect(model().attribute("banners", hasSize(0)))  // Verifica que la lista esté vacía
+                .andExpect(model().attribute("role", "ROLE_USER"));  // Verifica que el rol esté presente en el modelo
+
+        // Verificamos que el RestTemplate haya sido invocado correctamente
+        verify(restTemplate).exchange(
+                eq("http://localhost:8080/public/home"),
+                eq(HttpMethod.GET),
+                any(),
+                eq(new ParameterizedTypeReference<Map<String, Object>>() {}));
     }
-
-
+        
 
 }

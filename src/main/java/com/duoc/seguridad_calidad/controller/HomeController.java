@@ -36,6 +36,7 @@ import com.duoc.seguridad_calidad.model.User;
 public class HomeController {
 
     String url = "http://localhost:8080";
+    
 
     private TokenStore tokenStore;
     private static final String VIEW_REGISTRO = "registro";
@@ -47,6 +48,7 @@ public class HomeController {
     
     public HomeController(TokenStore tokenStore) {
         this.tokenStore = tokenStore; // Inyección de dependencias
+        
     }
 
     
