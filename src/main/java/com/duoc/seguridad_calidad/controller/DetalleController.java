@@ -32,6 +32,8 @@ public class DetalleController {
 
     private TokenStore tokenStore;
 
+    private final RestTemplate restTemplate;
+
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
     public static final String PRIVATE_RECIPES_BASE = "/private/recetas/";
@@ -39,15 +41,16 @@ public class DetalleController {
     public static final String ERROR_MESSAGE = "errorMessage";
     public static final String SUCCESS_MESSAGE = "successMessage";
 
-    public DetalleController(TokenStore tokenStore) {
-        super();
+    // Inyección de TokenStore y RestTemplate en el constructor
+    public DetalleController(TokenStore tokenStore, RestTemplate restTemplate) {
         this.tokenStore = tokenStore;
+        this.restTemplate = restTemplate;
     }
 
     @GetMapping("/recetas/{id}/detalle")
     public String getRecetaDetalle(@PathVariable Long id, Model model) {
 
-        final var restTemplate = new RestTemplate();
+        
         HttpHeaders headers = new HttpHeaders();
 
         headers.set(AUTHORIZATION_HEADER, BEARER_PREFIX + this.tokenStore.getToken());  // Agregar prefijo "Bearer "
@@ -92,7 +95,7 @@ public class DetalleController {
             @RequestParam String videoUrl, 
             RedirectAttributes redirectAttributes) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
+           
 
             // Crear encabezados para enviar parámetros
             HttpHeaders headers = new HttpHeaders();
@@ -138,7 +141,7 @@ public class DetalleController {
             @RequestParam String comentario,
             RedirectAttributes redirectAttributes) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
+            
 
             // Crear encabezados para enviar parámetros
             HttpHeaders headers = new HttpHeaders();

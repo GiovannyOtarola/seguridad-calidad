@@ -37,7 +37,7 @@ public class HomeController {
 
     String url = "http://localhost:8080";
     
-
+    private final RestTemplate restTemplate;
     private TokenStore tokenStore;
     private static final String VIEW_REGISTRO = "registro";
     private static final String VIEW_PUBLICAR = "publicar";
@@ -46,17 +46,17 @@ public class HomeController {
     private static final String MENSAJE_ATTRIBUTE = "mensaje";
     private static final String VIEW_ADMIN = "admin";
     
-    public HomeController(TokenStore tokenStore) {
-        this.tokenStore = tokenStore; // Inyección de dependencias
-        
+    public HomeController(RestTemplate restTemplate, TokenStore tokenStore) {
+        this.restTemplate = restTemplate; // Inyección del RestTemplate configurado
+        this.tokenStore = tokenStore;     // Inyección de dependencias
     }
 
     
 
     @GetMapping("/home")
     public String home(Model model) {
-        final var restTemplate = new RestTemplate();
-
+       
+        
         // Realiza la solicitud GET al backend para obtener el mapa de respuesta
     ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url.concat("/public/home"), HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {});
 
@@ -87,7 +87,7 @@ public class HomeController {
                 .queryParam("paisOrigen", paisOrigen)
                 .queryParam("dificultad", dificultad);
 
-        RestTemplate restTemplate = new RestTemplate();
+       
         ResponseEntity<List<Receta>> response = restTemplate.exchange(
             builder.toUriString(), 
             HttpMethod.GET, 
@@ -112,7 +112,7 @@ public class HomeController {
     public String registrarUsuario(@ModelAttribute("usuario") User user, Model model) {
         try {
             // Realiza la solicitud POST al backend para registrar el usuario
-            RestTemplate restTemplate = new RestTemplate();
+            
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -148,7 +148,7 @@ public class HomeController {
     @PostMapping("/publicar")
     public String registrarReceta(@ModelAttribute("receta") Receta receta, Model model) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
+            
 
             // Crear encabezados para enviar JSON
             HttpHeaders headers = new HttpHeaders();
@@ -185,7 +185,7 @@ public class HomeController {
     @GetMapping("/admin")
     public String admin(Model model) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
+            
             HttpHeaders headers = new HttpHeaders();
             String token = tokenStore.getToken();
             if (token != null && !token.isEmpty()) {
@@ -214,7 +214,7 @@ public class HomeController {
     @PostMapping("/admin/users/{id}")
     public String actualizarUsuario(@PathVariable("id") Integer id, @ModelAttribute("usuario") User user, Model model) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
+            
 
             // Crear encabezados con token de autenticación
             HttpHeaders headers = new HttpHeaders();
@@ -256,7 +256,7 @@ public class HomeController {
     @GetMapping("/comentarios")
     public String comentarios(Model model) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
+            
             HttpHeaders headers = new HttpHeaders();
             String token = tokenStore.getToken();
             if (token != null && !token.isEmpty()) {
@@ -285,7 +285,7 @@ public class HomeController {
     @PostMapping("/admin/comentarios/{id}")
     public String actualizarComentarios(@PathVariable("id") Long id, @ModelAttribute("comentario") ComentarioValoracionDTO comentarioValoracion, Model model) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
+            
 
             // Crear encabezados con token de autenticación
             HttpHeaders headers = new HttpHeaders();

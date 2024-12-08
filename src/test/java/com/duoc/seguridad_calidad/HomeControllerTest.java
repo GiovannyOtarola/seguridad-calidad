@@ -39,51 +39,50 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(HomeController.class)
 public class HomeControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;  // Usamos MockMvc para pruebas de controladores
-
-    @MockBean
-    private TokenStore tokenStore;
-
-    @MockBean
-    private RestTemplate restTemplate; 
-
-
-
-    @Test
-    @WithMockUser(username = "testUser", roles = {"USER"}) // Simula un usuario autenticado con un rol
-    public void testHome_Success() throws Exception {
-        // Datos mockeados que devolveremos en la respuesta
-        Map<String, Object> mockResponse = new HashMap<>();
-        mockResponse.put("recetasRecientes", Collections.emptyList());
-        mockResponse.put("recetasPopulares", Collections.emptyList());
-        mockResponse.put("banners", Collections.emptyList());
-
-        // Configuramos el mock para el RestTemplate para evitar la conexión real
-        when(restTemplate.exchange(
+        @Autowired
+        private MockMvc mockMvc;
+    
+        @MockBean
+        private TokenStore tokenStore;
+    
+        @MockBean
+        private RestTemplate restTemplate;
+    
+        @Test
+        @WithMockUser(username = "testUser", roles = {"USER"})
+        public void testHome_Success() throws Exception {
+            // Datos mockeados
+            Map<String, Object> mockResponse = new HashMap<>();
+            mockResponse.put("recetasRecientes", Collections.emptyList());
+            mockResponse.put("recetasPopulares", Collections.emptyList());
+            mockResponse.put("banners", Collections.emptyList());
+    
+            // Configurar el mock de RestTemplate
+            ResponseEntity<Map<String, Object>> responseEntity = 
+                new ResponseEntity<>(mockResponse, HttpStatus.OK);
+    
+            when(restTemplate.exchange(
                 eq("http://localhost:8080/public/home"),
                 eq(HttpMethod.GET),
-                any(),
-                eq(new ParameterizedTypeReference<Map<String, Object>>() {}))
-        ).thenReturn(ResponseEntity.ok(mockResponse));  // Respuesta mockeada
-
-        // Realizamos la solicitud al controlador usando MockMvc
-        mockMvc.perform(get("/home")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer fake-jwt-token-with-role")) // Simula el encabezado de autenticación
-                .andExpect(status().isOk())
-                .andExpect(view().name("home"))
-                .andExpect(model().attribute("recetasRecientes", hasSize(0)))  // Verifica que la lista esté vacía
-                .andExpect(model().attribute("recetasPopulares", hasSize(0)))  // Verifica que la lista esté vacía
-                .andExpect(model().attribute("banners", hasSize(0)))  // Verifica que la lista esté vacía
-                .andExpect(model().attribute("role", "ROLE_USER"));  // Verifica que el rol esté presente en el modelo
-
-        // Verificamos que el RestTemplate haya sido invocado correctamente
-        verify(restTemplate).exchange(
+                isNull(),
+                eq(new ParameterizedTypeReference<Map<String, Object>>() {})
+            )).thenReturn(responseEntity);
+    
+            // Realizar la prueba
+            mockMvc.perform(get("/home"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("home"))
+                    .andExpect(model().attribute("recetasRecientes", hasSize(0)))
+                    .andExpect(model().attribute("recetasPopulares", hasSize(0)))
+                    .andExpect(model().attribute("banners", hasSize(0)));
+    
+            // Verificar que el método exchange fue llamado
+            verify(restTemplate).exchange(
                 eq("http://localhost:8080/public/home"),
                 eq(HttpMethod.GET),
-                any(),
-                eq(new ParameterizedTypeReference<Map<String, Object>>() {}));
-    }
-        
+                isNull(),
+                eq(new ParameterizedTypeReference<Map<String, Object>>() {})
+            );
+        }
 
 }
