@@ -9,11 +9,23 @@ public class AuthResponse {
         this.role = role;
     }
 
+    public AuthResponse() {
+        //TODO Auto-generated constructor stub
+    }
+
     public String getToken() {
         return token;
     }
 
     public String getRole() {
         return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

@@ -27,12 +27,15 @@ import org.slf4j.LoggerFactory;
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private final TokenStore tokenStore;
+    private final RestTemplate restTemplate;
 
-    public CustomAuthenticationProvider(TokenStore tokenStore) {
+    public CustomAuthenticationProvider(TokenStore tokenStore,RestTemplate restTemplate) {
         this.tokenStore = tokenStore;
+        this.restTemplate = restTemplate;
     }
 
     private static final Logger logger = LoggerFactory.getLogger(CustomAuthenticationProvider.class);
+   
     
      @Override
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
@@ -49,7 +52,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         requestBody.add("user", name);
         requestBody.add("encryptedPass", password);
 
-        final var restTemplate = new RestTemplate();
+        
         try {
             // Realiza la llamada a la API de autenticación
             final ResponseEntity<AuthResponse> responseEntity = restTemplate.postForEntity("http://localhost:8080/login", requestBody, AuthResponse.class);

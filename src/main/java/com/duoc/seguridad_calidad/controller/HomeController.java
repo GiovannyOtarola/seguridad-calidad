@@ -1,6 +1,7 @@
 package com.duoc.seguridad_calidad.controller;
 
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -56,10 +57,13 @@ public class HomeController {
     @GetMapping("/home")
     public String home(Model model) {
        
-        
-        // Realiza la solicitud GET al backend para obtener el mapa de respuesta
-    ResponseEntity<Map<String, Object>> response = restTemplate.exchange(url.concat("/public/home"), HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {});
-
+        try {
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                    "http://localhost:8080/public/home",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
         // Extrae los datos del mapa
         Map<String, Object> responseBody = response.getBody();
 
@@ -69,35 +73,45 @@ public class HomeController {
             model.addAttribute("banners", responseBody.get("banners"));
         }
 
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            model.addAttribute("recetasRecientes", null);
+            model.addAttribute("recetasPopulares", null);
+            model.addAttribute("banners", null);
+            
+        }
+
         return "home";
     }
 
     @GetMapping("/buscar")
     public String buscarRecetas(
-            @RequestParam(value = "nombre", required = false) String nombre,
-            @RequestParam(value = "tipoCocina", required = false) String tipoCocina,
-            @RequestParam(value = "paisOrigen", required = false) String paisOrigen,
-            @RequestParam(value = "dificultad", required = false) String dificultad,
-            Model model) {
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String tipoCocina,
+            @RequestParam(required = false) String paisOrigen,
+            @RequestParam(required = false) String dificultad,
+            Model model
+    ) {
+        try {
+            String url = "http://localhost:8080/public/buscar";
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+                    .queryParam("nombre", nombre)
+                    .queryParam("tipoCocina", tipoCocina)
+                    .queryParam("paisOrigen", paisOrigen)
+                    .queryParam("dificultad", dificultad);
 
-        // Construye la URL de búsqueda con los parámetros
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url + "/public/buscar")
-                .queryParam("nombre", nombre)
-                .queryParam("tipoCocina", tipoCocina)
-                .queryParam("paisOrigen", paisOrigen)
-                .queryParam("dificultad", dificultad);
+            ResponseEntity<List<Receta>> response = restTemplate.exchange(
+                    builder.toUriString(),
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
 
-       
-        ResponseEntity<List<Receta>> response = restTemplate.exchange(
-            builder.toUriString(), 
-            HttpMethod.GET, 
-            null, 
-            new ParameterizedTypeReference<List<Receta>>() {}
-        );
-
-
-        // Agrega los resultados al modelo para mostrar en la vista
-        model.addAttribute("resultados", response.getBody());
+            List<Receta> resultados = response.getBody();
+            model.addAttribute("resultados", resultados);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            model.addAttribute("resultados", Collections.emptyList()); // Lista vacía
+            model.addAttribute("error", "Ocurrió un error al buscar recetas. Intente nuevamente.");
+        }
 
         return "buscarRecetas";
     }
@@ -128,7 +142,7 @@ public class HomeController {
 
             if (response.getStatusCode() == HttpStatus.OK) {
                 model.addAttribute(MENSAJE_ATTRIBUTE, "Registro exitoso, por favor inicie sesión.");
-                return VIEW_LOGIN;  // Redirige al login después del registro exitoso
+                return "redirect:/login";  // Redirige al login después del registro exitoso
             } else {
                 model.addAttribute(ERROR_ATTRIBUTE, "Error al registrar el usuario.");
                 return VIEW_REGISTRO;  // Si hubo un error, vuelve a mostrar el formulario

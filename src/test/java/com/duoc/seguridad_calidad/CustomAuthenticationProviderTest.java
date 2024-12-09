@@ -9,10 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.web.client.RestTemplate;
 
+import org.springframework.web.client.RestTemplate;
 import com.duoc.seguridad_calidad.model.AuthResponse;
+
 import com.duoc.seguridad_calidad.model.TokenStore;
 import com.duoc.seguridad_calidad.provider.CustomAuthenticationProvider;
 
@@ -23,12 +23,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
+
 
 public class CustomAuthenticationProviderTest {
     
-    @InjectMocks
-    private CustomAuthenticationProvider authenticationProvider;
+ 
 
     @Mock
     private RestTemplate restTemplate;
@@ -45,6 +44,7 @@ public class CustomAuthenticationProviderTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this); // Inicializa los mocks antes de cada test
+
     }
 
     @SuppressWarnings("unlikely-arg-type")
@@ -95,6 +95,49 @@ public class CustomAuthenticationProviderTest {
         assertTrue(customAuthenticationProvider.supports(UsernamePasswordAuthenticationToken.class));
         assertFalse(customAuthenticationProvider.supports(Object.class));
     }
+
+
+
+    @Test
+    public void testAuthenticate_InvalidCredentials() {
+        // Arrange
+        String username = "testUser ";
+        String password = "testPassword";
+        Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
+
+        ResponseEntity<AuthResponse> responseEntity = new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+        when(restTemplate.postForEntity(any(String.class), any(), eq(AuthResponse.class))).thenReturn(responseEntity);
+
+        // Act & Assert
+        BadCredentialsException thrown = assertThrows(BadCredentialsException.class, () -> {
+            customAuthenticationProvider.authenticate(authentication);
+        });
+
+        assertEquals("Invalid username or password for user: testUser ", thrown.getMessage());
+    }
+
+    @Test
+    public void testAuthenticate_NullToken() {
+        // Arrange
+        String username = "testUser ";
+        String password = "testPassword";
+        Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
+
+        AuthResponse authResponse = new AuthResponse();
+        authResponse.setToken(null); // Simulamos que no hay token
+
+        ResponseEntity<AuthResponse> responseEntity = new ResponseEntity<>(authResponse, HttpStatus.OK);
+        when(restTemplate.postForEntity(any(String.class), any(), eq(AuthResponse.class))).thenReturn(responseEntity);
+
+        // Act & Assert
+        BadCredentialsException thrown = assertThrows(BadCredentialsException.class, () -> {
+            customAuthenticationProvider.authenticate(authentication);
+        });
+
+        assertEquals("Invalid username or password for user: testUser ", thrown.getMessage());
+    }
+
+
 
 
 }

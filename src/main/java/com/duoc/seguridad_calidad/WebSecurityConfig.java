@@ -5,6 +5,7 @@ import com.duoc.seguridad_calidad.provider.CustomAuthenticationSuccessHandler;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,7 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity(debug = true)
 public class WebSecurityConfig {
 
-     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+     public final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
      public WebSecurityConfig(CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) {
         this.customAuthenticationSuccessHandler = customAuthenticationSuccessHandler;
@@ -38,6 +39,7 @@ public class WebSecurityConfig {
         http
             .authorizeHttpRequests(requests -> requests
             .requestMatchers("/", "/home", "/buscar","/login","/registro","/images/**.jpg").permitAll()
+            .requestMatchers(HttpMethod.POST, "/registro").permitAll()
             .requestMatchers("/admin","/admin/**").hasRole("ADMIN")
             .requestMatchers("/recetas/**").authenticated() 
             .requestMatchers("/**.css").permitAll()

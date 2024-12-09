@@ -126,7 +126,7 @@
 <div class="container results-container">
     <h2 class="text-center my-4">Resultados de Búsqueda</h2>
 
-    <div th:if="${resultados.isEmpty()}" class="text-center">
+    <div th:if="${resultados != null and !resultados.isEmpty()}" class="text-center">
         <p>No se encontraron recetas.</p>
     </div>
 
