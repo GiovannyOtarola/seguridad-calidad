@@ -602,5 +602,25 @@ public class HomeControllerTest {
                 .andExpect(view().name("comentarios"));  // Verifica que se devuelva la vista comentarios
         }
 
-       
+        @Test
+        @WithMockUser(username = "admin", roles = {"ADMIN"})
+        public void testActualizarComentarios_UnexpectedException() throws Exception {
+            ComentarioValoracionDTO mockComentario = new ComentarioValoracionDTO();
+            mockComentario.setComentario("Comentario actualizado");
+    
+            when(tokenStore.getToken()).thenReturn("testToken");
+            when(restTemplate.exchange(
+                    eq("http://localhost:8080/private/comentarios/1"),
+                    eq(HttpMethod.PUT),
+                    any(HttpEntity.class),
+                    eq(String.class)
+            )).thenThrow(new RuntimeException("Unexpected error occurred"));
+    
+            mockMvc.perform(post("/admin/comentarios/1")
+                    .with(csrf())
+                    .flashAttr("comentario", mockComentario))
+                    .andExpect(status().isOk()) // La vista se renderiza con el error
+                    .andExpect(view().name("comentarios"))
+                    .andExpect(model().attribute("error", "Error inesperado: Unexpected error occurred"));
+        }
 }
