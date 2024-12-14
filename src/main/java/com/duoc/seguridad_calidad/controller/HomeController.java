@@ -46,7 +46,13 @@ public class HomeController {
     private static final String ERROR_ATTRIBUTE = "error";
     private static final String MENSAJE_ATTRIBUTE = "mensaje";
     private static final String VIEW_ADMIN = "admin";
-    
+    private static final String RECETAS_POPULARES = "recetasPopulares";
+    private static final String RECETAS_RECIENTES = "recetasRecientes";
+    private static final String BANNERS = "banners";
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String BEARER = "Bearer ";
+    private static final String COMENTARIOS = "comentarios";
+
     public HomeController(RestTemplate restTemplate, TokenStore tokenStore) {
         this.restTemplate = restTemplate; // Inyección del RestTemplate configurado
         this.tokenStore = tokenStore;     // Inyección de dependencias
@@ -68,15 +74,15 @@ public class HomeController {
         Map<String, Object> responseBody = response.getBody();
 
         if (responseBody != null) {
-            model.addAttribute("recetasRecientes", responseBody.get("recetasRecientes"));
-            model.addAttribute("recetasPopulares", responseBody.get("recetasPopulares"));
-            model.addAttribute("banners", responseBody.get("banners"));
+            model.addAttribute(RECETAS_RECIENTES, responseBody.get(RECETAS_RECIENTES));
+            model.addAttribute(RECETAS_POPULARES, responseBody.get(RECETAS_POPULARES));
+            model.addAttribute(BANNERS, responseBody.get(BANNERS));
         }
 
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-            model.addAttribute("recetasRecientes", null);
-            model.addAttribute("recetasPopulares", null);
-            model.addAttribute("banners", null);
+            model.addAttribute(RECETAS_RECIENTES, null);
+            model.addAttribute(RECETAS_POPULARES, null);
+            model.addAttribute(BANNERS, null);
             
         }
 
@@ -110,7 +116,7 @@ public class HomeController {
             model.addAttribute("resultados", resultados);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             model.addAttribute("resultados", Collections.emptyList()); // Lista vacía
-            model.addAttribute("error", "Ocurrió un error al buscar recetas. Intente nuevamente.");
+            model.addAttribute(ERROR_ATTRIBUTE, "Ocurrió un error al buscar recetas. Intente nuevamente.");
         }
 
         return "buscarRecetas";
@@ -170,7 +176,7 @@ public class HomeController {
 
             // Obtener el token del TokenStore
             String token = tokenStore.getToken(); 
-            headers.set("Authorization", "Bearer " + token);
+            headers.set(AUTHORIZATION, BEARER + token);
 
             // Crear la entidad de la solicitud
             HttpEntity<Receta> request = new HttpEntity<>(receta, headers);
@@ -203,7 +209,7 @@ public class HomeController {
             HttpHeaders headers = new HttpHeaders();
             String token = tokenStore.getToken();
             if (token != null && !token.isEmpty()) {
-                headers.set("Authorization", "Bearer " + token);
+                headers.set(AUTHORIZATION, BEARER + token);
             }
 
             HttpEntity<?> requestEntity = new HttpEntity<>(headers);
@@ -235,7 +241,7 @@ public class HomeController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             String token = tokenStore.getToken();
             if (token != null && !token.isEmpty()) {
-                headers.set("Authorization", "Bearer " + token);
+                headers.set(AUTHORIZATION, BEARER + token);
             } else {
                 model.addAttribute(ERROR_ATTRIBUTE, "Token de autenticación no disponible.");
                 return VIEW_LOGIN; // Redirigir al login si no hay token
@@ -274,7 +280,7 @@ public class HomeController {
             HttpHeaders headers = new HttpHeaders();
             String token = tokenStore.getToken();
             if (token != null && !token.isEmpty()) {
-                headers.set("Authorization", "Bearer " + token);
+                headers.set(AUTHORIZATION, BEARER + token);
             }
 
             HttpEntity<?> requestEntity = new HttpEntity<>(headers);
@@ -286,14 +292,14 @@ public class HomeController {
             );
 
             // Agrega los usuarios obtenidos al modelo
-            model.addAttribute("comentarios", response.getBody());
+            model.addAttribute(COMENTARIOS, response.getBody());
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             model.addAttribute(ERROR_ATTRIBUTE, "Error al cargar los comentarios: " + e.getStatusCode());
         } catch (Exception e) {
             model.addAttribute(ERROR_ATTRIBUTE, "Error inesperado al cargar los comentarios: " + e.getMessage());
         }
 
-        return "comentarios";
+        return COMENTARIOS;
     }
 
     @PostMapping("/admin/comentarios/{id}")
@@ -306,7 +312,7 @@ public class HomeController {
             headers.setContentType(MediaType.APPLICATION_JSON);
             String token = tokenStore.getToken();
             if (token != null && !token.isEmpty()) {
-                headers.set("Authorization", "Bearer " + token);
+                headers.set(AUTHORIZATION, BEARER + token);
             } else {
                 model.addAttribute(ERROR_ATTRIBUTE, "Token de autenticación no disponible.");
                 return VIEW_LOGIN; // Redirigir al login si no hay token
@@ -335,6 +341,6 @@ public class HomeController {
             model.addAttribute(ERROR_ATTRIBUTE, "Error inesperado: " + e.getMessage());
         }
 
-        return "comentarios"; // Muestra nuevamente la página de administración con el error
+        return COMENTARIOS; // Muestra nuevamente la página de administración con el error
     }
 }

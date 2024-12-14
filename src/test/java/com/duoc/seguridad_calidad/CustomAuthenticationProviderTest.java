@@ -47,7 +47,7 @@ public class CustomAuthenticationProviderTest {
 
     }
 
-    @SuppressWarnings("unlikely-arg-type")
+    
     @Test
     void testAuthenticateToken() {
          
@@ -58,7 +58,7 @@ public class CustomAuthenticationProviderTest {
         ResponseEntity<String> responseEntity = ResponseEntity.ok(token);
         when(restTemplate.exchange(eq("http://localhost:8080/login"), eq(HttpMethod.POST), any(HttpEntity.class), eq(String.class)))
                 .thenReturn(responseEntity);
-        equals(token); // Verificar que el token es el esperado
+        assertEquals(token, responseEntity.getBody(), "El token recibido no coincide con el esperado."); // Verificar que el token es el esperado
     }
     
 
@@ -67,25 +67,28 @@ public class CustomAuthenticationProviderTest {
         // Simular un error en la autenticación
         String username = "user";
         String password = "wrongPassword";
-
+    
         // Simulamos una respuesta de error (por ejemplo, una respuesta HTTP 403)
         ResponseEntity<String> response = new ResponseEntity<>(HttpStatus.FORBIDDEN);
-
+    
         // Configuramos el mock de RestTemplate para que devuelva una respuesta de error
         when(restTemplate.postForEntity(anyString(), any(), eq(String.class)))
-            .thenReturn(response);
-
+                .thenReturn(response);
+    
         // Crear un objeto de autenticación (simulando el usuario que se autentica)
         Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
-
+    
         // Act: Intentar autenticar (esto debe lanzar una excepción)
         try {
             customAuthenticationProvider.authenticate(authentication);
             // Si no se lanza una excepción, la prueba falla
-            assert false;
+            fail("Expected BadCredentialsException to be thrown");
         } catch (BadCredentialsException ex) {
             // Assert: Verificar que la excepción es la esperada
-            assert ex.getMessage().contains("Invalid username or password");
+            assertTrue(ex.getMessage().contains("Invalid username or password"));
+    
+            // Aserción adicional: Verificar que la respuesta simulada sea FORBIDDEN
+            assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode(), "Expected HTTP status 403 (Forbidden).");
         }
     }
 

@@ -11,6 +11,7 @@ public class Receta {
 
 
     public Receta() {
+        //Este contructor esta vacio de forma intencional
     }
     
     private Long id;
